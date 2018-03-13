@@ -1,0 +1,839 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  V_2-TE-KE00-183-1_0_0_0:1.1.1.1 Keysight:1.1.1;
+locks    ; strict;
+comment  @# @;
+
+
+1.1
+date     2016.01.28.05.34.45;  author user2;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2016.01.28.05.34.45;  author user2;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@!!!!    6    0    1 1124346971  Vf5ab                                         
+!  93C46 EEPROM
+!  Requires Data file in Digital
+!  SRR 11/8/99 (93c66)
+!  LB  9/13/00 modified for (93c46)
+
+warning" requires a file digital/Data to test the device"
+warning" a sample file can be used at /var/hp3070/library/lsi_2/93c66_data"
+warning" use the sample file unless you are programming this eeprom through"
+warning" another method, such as with the bar code scanner.  If using the "
+warning" bar code scanner, use /var/hp3070/standard/testmain.eeprom.  Any"
+warning" questions, call Sam Richart."
+
+processor vpu
+sequential
+enable loop counter
+
+default device "u914"
+
+assign   VCC                  to pins *
+assign   GND                  to pins *
+
+assign   Chip_select          to pins 1
+assign   Clock_input          to pins 2
+assign   Data_in              to pins 3
+assign   Data_out             to pins 4
+assign   No_connect           to pins *,*
+
+power          VCC,GND
+family         TTL
+
+inputs         formatted  Clock_input
+inputs         Chip_select, Data_in
+
+outputs        Data_out
+
+nondigital     No_connect
+
+!*******************   Disable information        *****************
+
+disable Data_out with Chip_select to "0"
+
+!*******************   Backtrace information      *****************
+
+when Chip_select is "0" inactive Data_out
+
+trace Data_out to Chip_select,Clock_input,Data_in
+
+set ref on pins 1,2,3 to dl 0,dh 4.5
+set ref on pins 4     to rl 1.2
+set load on pins 4 to pull up
+
+!*******************************************************************
+!****************************  TIMING SECTION *********************************
+
+events every 700n internal
+
+timing set default Default is 2 events
+   drive vector at event 0
+   receive vector at event 1
+   at event 0 set Clock_input  to "0"        ! GJO 951220 - Just in case
+end timing set
+
+timing set Clock is 2 events
+   drive vector at event 0
+   receive vector at event 1
+   at event 0 set Clock_input   to "0"
+   at event 1 set Clock_input   to "1"
+end timing set
+
+timing set No_Clock is 1 events
+   drive vector at event 0
+   receive vector at event 0
+   at event 0 set Clock_input   to "0"
+end timing set
+
+!*******************************************************************
+!*******************      VECTOR SECTION       *********************
+!*******************************************************************
+
+vector  Initialize
+   use timing set Default
+   set   Chip_select to "0"
+   set   Data_in     to "0"
+end vector
+
+vector  Keep
+   use timing set Default
+   set   Chip_select to "K"
+   set   Data_in     to "K"
+end vector
+
+vector  Chip_select_high
+   initialize to Keep
+   use timing set No_Clock
+   set   Chip_select to "1"
+end vector
+
+vector  Chip_select_low
+   initialize to Keep
+   use timing set Clock
+   set   Chip_select to "0"
+end vector
+
+vector  DI                              ! Data_block vector
+   initialize to Keep
+   use timing set Clock
+   set   Data_in     to "0"             ! Set to drive in unit execute stmnt.
+end vector
+
+vector  DO                              ! Data_block vector
+   initialize to Keep
+   use timing set Clock
+   set   Data_out    to "0"             ! Set to receive in unit execute stmnt.
+end vector
+
+vector  DI_0
+   initialize to Keep
+   use timing set Clock
+   set   Data_in     to "0"
+end vector
+
+vector  DI_1
+   initialize to Keep
+   use timing set Clock
+   set   Data_in     to "1"
+end vector
+
+vector  DO_0
+   initialize to Keep
+   use timing set Clock
+   set   Data_out    to "0"
+end vector
+
+vector  DO_1
+   initialize to Keep
+   use timing set Clock
+   set   Data_out    to "1"
+end vector
+
+data  Data_Block  to  groups    Data_in
+   file  "Data" 512
+end data
+
+data  Data_Block1  to  groups    Data_out
+   file  "Data" 512
+end data
+
+!*********************  SUBROUTINE  SECTION   *********************************
+
+! All op codes are two bits preceded by a '1' start bit
+! All op codes are followed by a 6 bit address that differentiates
+! the various commands with similar op codes, or that provides the start
+! address for read and write commands.
+
+sub  Read_Ram              ! MSB and Op Code for Read
+   execute  DI_1
+   execute  DI_1
+   execute  DI_0
+end sub
+
+sub  Write_Ram             ! MSB and Op Code for Write
+   execute  DI_1
+   execute  DI_0
+   execute  DI_1
+end sub
+
+sub  Wen_Wds_Wral          ! MSB and Op Code for Write Enable, Write Disable,
+   execute  DI_1         ! and Write All
+   execute  DI_0
+   execute  DI_0
+end sub
+
+sub  WEN                   ! Address for Write Enable
+   execute  DI_1
+   execute  DI_1
+   repeat   4 times
+      execute  DI_0
+   end repeat
+end sub
+
+sub  WDS                   ! Address for Write Disable
+   repeat   6 times
+      execute  DI_0
+   end repeat
+end sub
+
+sub  WRAL                  ! Address for Write All
+   execute  DI_0
+   execute  DI_1
+   repeat   4 times
+      execute  DI_0
+   end repeat
+end sub
+
+sub  ERAL                  ! Address for Erase All
+   execute  DI_1
+   execute  DI_0
+   repeat   4 times
+      execute  DI_0
+   end repeat
+end sub
+
+sub  Address_00           ! Set 2 Address bits to 00
+   execute  DI_0
+   execute  DI_0
+end sub
+
+sub  Address_01           ! Set 2 Address bits to 01
+   execute  DI_0
+   execute  DI_1
+end sub
+
+sub  Address_10           ! Set 2 Address bits to 10
+   execute  DI_1
+   execute  DI_0
+end sub
+
+sub  Address_0            ! Set 4 Address bits to 0
+   execute  DI_0
+   execute  DI_0
+   execute  DI_0
+   execute  DI_0
+end sub
+
+sub  Address_1            ! Set 4 Address bits to 1
+   execute  DI_0
+   execute  DI_0
+   execute  DI_0
+   execute  DI_1
+end sub
+
+sub  Address_2            ! Set 4 Address bits to 2
+   execute  DI_0
+   execute  DI_0
+   execute  DI_1
+   execute  DI_0
+end sub
+
+sub  Address_3            ! Set 4 Address bits to 3
+   execute  DI_0
+   execute  DI_0
+   execute  DI_1
+   execute  DI_1
+end sub
+
+sub  Address_4           ! Set 4 Address bits to 4
+   execute  DI_0
+   execute  DI_1
+   execute  DI_0
+   execute  DI_0
+end sub
+
+sub  Address_5           ! Set 4 Address bits to 5
+   execute  DI_0
+   execute  DI_1
+   execute  DI_0
+   execute  DI_1
+end sub
+
+sub  Address_6           ! Set 4 Address bits to 6
+   execute  DI_0
+   execute  DI_1
+   execute  DI_1
+   execute  DI_0
+end sub
+
+sub  Address_7           ! Set 4 Address bits to 7
+   execute  DI_0
+   execute  DI_1
+   execute  DI_1
+   execute  DI_1
+end sub
+
+sub  Address_8           ! Set 4 Address bits to 8
+   execute  DI_1
+   execute  DI_0
+   execute  DI_0
+   execute  DI_0
+end sub
+
+sub  Address_9           ! Set 4 Address bits to 9
+   execute  DI_1
+   execute  DI_0
+   execute  DI_0
+   execute  DI_1
+end sub
+
+sub  Address_A           ! Set 4 Address bits to A
+   execute  DI_1
+   execute  DI_0
+   execute  DI_1
+   execute  DI_0
+end sub
+
+sub  Address_B           ! Set 4 Address bits to B
+   execute  DI_1
+   execute  DI_0
+   execute  DI_1
+   execute  DI_1
+end sub
+
+sub  Address_C           ! Set 4 Address bits to C
+   execute  DI_1
+   execute  DI_1
+   execute  DI_0
+   execute  DI_0
+end sub
+
+sub  Address_D           ! Set 4 Address bits to D
+   execute  DI_1
+   execute  DI_1
+   execute  DI_0
+   execute  DI_1
+end sub
+
+sub  Address_E           ! Set 4 Address bits to E
+   execute  DI_1
+   execute  DI_1
+   execute  DI_1
+   execute  DI_0
+end sub
+
+sub  Address_F           ! Set 4 Address bits to F
+   execute  DI_1
+   execute  DI_1
+   execute  DI_1
+   execute  DI_1
+end sub
+
+sub  Write_All_0000   !100 01xxxxxx (0000)
+   execute  Chip_select_high
+   execute  DO_1      ! start bit
+   execute  DO_0      !\
+   execute  DO_0      ! 00 is instruction to write all addresses
+   execute  DO_0
+   execute  DO_1      ! write to address 01xxxxxx as per data sheet
+   repeat   4 times
+      execute  DO_0
+   end repeat
+   repeat  16 times
+      execute  DO_0   ! write 0000 as per MID's request
+   end repeat
+end sub
+
+sub  Read_instruction_A7_A0             !110 (A7 - A0)
+   execute  Chip_select_high
+   execute  DI_1
+   execute  DI_1
+   execute  DI_0
+end sub
+
+sub  Wait_for_Ready           !Subroutine to ends the WRITE Sequence
+      execute  Chip_select_low
+      execute  Chip_select_low
+      execute  Chip_select_low
+      execute  Chip_select_high
+
+repeat 10000 times
+   execute Chip_select_low
+end repeat
+end sub
+
+!*********************   UNIT  SECTION   **************************************
+
+!unit  "Initialize"
+!   execute  Initialize
+!end unit
+
+!******************************************************************************
+!       Read back data with data block  variable vectors
+!******************************************************************************
+!
+unit  "Verify_addr_1"        ! Using data block
+  rewind Data_Block1
+   execute  Chip_select_high
+   call  Read_Ram                       ! MSB & Op code for write
+   call  Address_00                    ! Set 1st 2 address bits to 0
+   call  Address_0                     ! Set 2nd 4 address bits to 0
+   execute  DO_0                        ! Reads dummy bit (zero)
+   repeat   16 times
+      execute  DO receive data Data_Block1  ! read eeprom format and binary addr
+     next Data_Block1
+   end repeat
+   execute  Chip_select_low             ! GJO 951220 - Fails w/o this
+end unit
+
+unit  "Verify_addr_2"
+   execute  Chip_select_high
+   call  Read_Ram                       ! MSB & Op code for write
+   call  Address_00                    ! Set 1st 2 address bits to 0
+   call  Address_1                     ! Set 2nd 4 address bits to 1
+   execute  DO_0                        ! Reads dummy bit (zero)
+   repeat   16 times
+      execute  DO receive data Data_Block1  ! start reading board number field
+    next Data_Block1
+   end repeat
+   execute  Chip_select_low             ! GJO 951220 - Fails w/o this
+end unit
+
+unit  "Verify_addr_3"        ! Using data block
+   execute  Chip_select_high
+   call  Read_Ram                       ! MSB & Op code for write
+   call  Address_00                    ! Set 1st 2 address bits to 0
+   call  Address_2                     ! Set 2nd 4 address bits to 2
+   execute  DO_0                        ! Reads dummy bit (zero)
+   repeat   16 times
+      execute  DO receive data Data_Block1  ! more board number field
+     next Data_Block1
+   end repeat
+   execute  Chip_select_low             ! GJO 951220 - Fails w/o this
+end unit
+
+unit  "Verify_addr_4"
+   execute  Chip_select_high
+   call  Read_Ram                       ! MSB & Op code for write
+   call  Address_00                    ! Set 1st 2 address bits to 0
+   call  Address_3                     ! Set 2nd 4 address bits to 3
+   execute  DO_0                        ! Reads dummy bit (zero)
+   repeat   16 times
+      execute  DO receive data Data_Block1  ! more board number field
+    next Data_Block1
+   end repeat
+   execute  Chip_select_low             ! GJO 951220 - Fails w/o this
+end unit
+
+unit  "Verify_addr_5"        ! Using data block
+   execute  Chip_select_high
+   call  Read_Ram                       ! MSB & Op code for write
+   call  Address_00                    ! Set 1st 2 address bits to 0
+   call  Address_4                     ! Set 2nd 4 address bits to 4
+   execute  DO_0                        ! Reads dummy bit (zero)
+   repeat   16 times
+      execute  DO receive data Data_Block1  ! more board number field
+     next Data_Block1
+   end repeat
+   execute  Chip_select_low             ! GJO 951220 - Fails w/o this
+end unit
+
+unit  "Verify_addr_6"
+   execute  Chip_select_high
+   call  Read_Ram                       ! MSB & Op code for write
+   call  Address_00                    ! Set 1st 2 address bits to 0
+   call  Address_5                     ! Set 2nd 4 address bits to 5
+   execute  DO_0                        ! Reads dummy bit (zero)
+   repeat   16 times
+      execute  DO receive data Data_Block1  ! Null pad 16 bits
+    next Data_Block1
+   end repeat
+   execute  Chip_select_low             ! GJO 951220 - Fails w/o this
+end unit
+
+unit  "Verify_addr_7"        ! Using data block
+   execute  Chip_select_high
+   call  Read_Ram                       ! MSB & Op code for write
+   call  Address_00                    ! Set 1st 2 address bits to 0
+   call  Address_6                     ! Set 2nd 4 address bits to 6
+   execute  DO_0                        ! Reads dummy bit (zero)
+   repeat   16 times
+      execute  DO receive data Data_Block1  ! write vendor code
+     next Data_Block1
+   end repeat
+   execute  Chip_select_low             ! GJO 951220 - Fails w/o this
+end unit
+
+unit  "Verify_addr_8"
+   execute  Chip_select_high
+   call  Read_Ram                       ! MSB & Op code for write
+   call  Address_00                    ! Set 1st 2 address bits to 0
+   call  Address_7                     ! Set 2nd 4 address bits to 7
+   execute  DO_0                        ! Reads dummy bit (zero)
+   repeat   16 times
+      execute  DO receive data Data_Block1  ! Date Code "YY"
+    next Data_Block1
+   end repeat
+   execute  Chip_select_low             ! GJO 951220 - Fails w/o this
+end unit
+
+unit  "Verify_addr_9"        ! Using data block
+   execute  Chip_select_high
+   call  Read_Ram                       ! MSB & Op code for write
+   call  Address_00                    ! Set 1st 2 address bits to 0
+   call  Address_8                     ! Set 2nd 4 address bits to 8
+   execute  DO_0                        ! Reads dummy bit (zero)
+   repeat   16 times
+      execute  DO receive data Data_Block1  ! Date code 'WW'
+     next Data_Block1
+   end repeat
+   execute  Chip_select_low             ! GJO 951220 - Fails w/o this
+end unit
+
+unit  "Verify_addr_10"
+   execute  Chip_select_high
+   call  Read_Ram                       ! MSB & Op code for write
+   call  Address_00                    ! Set 1st 2 address bits to 0
+   call  Address_9                     ! Set 2nd 4 address bits to 9
+   execute  DO_0                        ! Reads dummy bit (zero)
+   repeat   16 times
+      execute  DO receive data Data_Block1  ! Serial Number
+    next Data_Block1
+   end repeat
+   execute  Chip_select_low             ! GJO 951220 - Fails w/o this
+end unit
+
+unit  "Verify_addr_11"        ! Using data block
+   execute  Chip_select_high
+   call  Read_Ram                       ! MSB & Op code for write
+   call  Address_00                    ! Set 1st 2 address bits to 0
+   call  Address_A                     ! Set 2nd 4 address bits to A
+   execute  DO_0                        ! Reads dummy bit (zero)
+   repeat   16 times
+      execute  DO receive data Data_Block1  ! Serial Number
+     next Data_Block1
+   end repeat
+   execute  Chip_select_low             ! GJO 951220 - Fails w/o this
+end unit
+
+unit  "Verify_addr_12"
+   execute  Chip_select_high
+   call  Read_Ram                       ! MSB & Op code for write
+   call  Address_00                    ! Set 1st 2 address bits to 0
+   call  Address_B                     ! Set 2nd 4 address bits to B
+   execute  DO_0                        ! Reads dummy bit (zero)
+   repeat   16 times
+      execute  DO receive data Data_Block1  ! last of Serial Number and nulls
+    next Data_Block1
+   end repeat
+   execute  Chip_select_low             ! GJO 951220 - Fails w/o this
+end unit
+
+unit  "Verify_addr_13"        ! Using data block
+   execute  Chip_select_high
+   call  Read_Ram                       ! MSB & Op code for write
+   call  Address_00                    ! Set 1st 2 address bits to 0
+   call  Address_C                     ! Set 2nd 4 address bits to C
+   execute  DO_0                        ! Reads dummy bit (zero)
+   repeat   16 times
+      execute  DO receive data Data_Block1  ! PIC material list rev
+     next Data_Block1
+   end repeat
+   execute  Chip_select_low             ! GJO 951220 - Fails w/o this
+end unit
+
+unit  "Verify_addr_14"
+   execute  Chip_select_high
+   call  Read_Ram                       ! MSB & Op code for write
+   call  Address_00                    ! Set 1st 2 address bits to 0
+   call  Address_D                     ! Set 2nd 4 address bits to D
+   execute  DO_0                        ! Reads dummy bit (zero)
+   repeat   16 times
+      execute  DO receive data Data_Block1  ! null padding for mat list rev #
+    next Data_Block1
+   end repeat
+   execute  Chip_select_low             ! GJO 951220 - Fails w/o this
+end unit
+
+unit  "Verify_addr_15"        ! Using data block
+   execute  Chip_select_high
+   call  Read_Ram                       ! MSB & Op code for write
+   call  Address_00                    ! Set 1st 2 address bits to 0
+   call  Address_E                     ! Set 2nd 4 address bits to E
+   execute  DO_0                        ! Reads dummy bit (zero)
+   repeat   16 times
+      execute  DO receive data Data_Block1  ! null padding, FW rev
+     next Data_Block1
+   end repeat
+   execute  Chip_select_low             ! GJO 951220 - Fails w/o this
+end unit
+
+unit  "Verify_addr_16"
+   execute  Chip_select_high
+   call  Read_Ram                       ! MSB & Op code for write
+   call  Address_00                    ! Set 1st 2 address bits to 0
+   call  Address_F                     ! Set 2nd 4 address bits to F
+   execute  DO_0                        ! Reads dummy bit (zero)
+   repeat   16 times
+      execute  DO receive data Data_Block1  ! start board name field
+    next Data_Block1
+   end repeat
+   execute  Chip_select_low             ! GJO 951220 - Fails w/o this
+end unit
+
+unit  "Verify_addr_17"        ! Using data block
+   execute  Chip_select_high
+   call  Read_Ram                       ! MSB & Op code for write
+   call  Address_01                    ! Set 1st 2 address bits to 1
+   call  Address_0                     ! Set 2nd 4 address bits to 0
+   execute  DO_0                        ! Reads dummy bit (zero)
+   repeat   16 times
+      execute  DO receive data Data_Block1  ! continue board name field
+     next Data_Block1
+   end repeat
+   execute  Chip_select_low             ! GJO 951220 - Fails w/o this
+end unit
+
+unit  "Verify_addr_18"
+   execute  Chip_select_high
+   call  Read_Ram                       ! MSB & Op code for write
+   call  Address_01                    ! Set 1st 2 address bits to 1
+   call  Address_1                     ! Set 2nd 4 address bits to 1
+   execute  DO_0                        ! Reads dummy bit (zero)
+   repeat   16 times
+      execute  DO receive data Data_Block1  ! continue board name field
+    next Data_Block1
+   end repeat
+   execute  Chip_select_low             ! GJO 951220 - Fails w/o this
+end unit
+
+unit  "Verify_addr_19"        ! Using data block
+   execute  Chip_select_high
+   call  Read_Ram                       ! MSB & Op code for write
+   call  Address_01                    ! Set 1st 2 address bits to 1
+   call  Address_2                     ! Set 2nd 4 address bits to 2
+   execute  DO_0                        ! Reads dummy bit (zero)
+   repeat   16 times
+      execute  DO receive data Data_Block1  ! continue board name field
+     next Data_Block1
+   end repeat
+   execute  Chip_select_low             ! GJO 951220 - Fails w/o this
+end unit
+
+unit  "Verify_addr_20"
+   execute  Chip_select_high
+   call  Read_Ram                       ! MSB & Op code for write
+   call  Address_01                    ! Set 1st 2 address bits to 1
+   call  Address_3                     ! Set 2nd 4 address bits to 3
+   execute  DO_0                        ! Reads dummy bit (zero)
+   repeat   16 times
+      execute  DO receive data Data_Block1  ! continue board name field
+    next Data_Block1
+   end repeat
+   execute  Chip_select_low             ! GJO 951220 - Fails w/o this
+end unit
+
+unit  "Verify_addr_21"        ! Using data block
+   execute  Chip_select_high
+   call  Read_Ram                       ! MSB & Op code for write
+   call  Address_01                    ! Set 1st 2 address bits to 1
+   call  Address_4                     ! Set 2nd 4 address bits to 4
+   execute  DO_0                        ! Reads dummy bit (zero)
+   repeat   16 times
+      execute DO receive data Data_Block1 ! null padding,more board name field
+     next Data_Block1
+   end repeat
+   execute  Chip_select_low             ! GJO 951220 - Fails w/o this
+end unit
+
+unit  "Verify_addr_22"
+   execute  Chip_select_high
+   call  Read_Ram                       ! MSB & Op code for write
+   call  Address_01                    ! Set 1st 2 address bits to 1
+   call  Address_5                     ! Set 2nd 4 address bits to 5
+   execute  DO_0                        ! Reads dummy bit (zero)
+   repeat   16 times
+      execute  DO receive data Data_Block1  ! Null pad 16 bits, name field
+    next Data_Block1
+   end repeat
+   execute  Chip_select_low             ! GJO 951220 - Fails w/o this
+end unit
+
+unit  "Verify_addr_23"        ! Using data block
+   execute  Chip_select_high
+   call  Read_Ram                       ! MSB & Op code for write
+   call  Address_01                    ! Set 1st 2 address bits to 1
+   call  Address_6                     ! Set 2nd 4 address bits to 6
+   execute  DO_0                        ! Reads dummy bit (zero)
+   repeat   16 times
+      execute  DO receive data Data_Block1  ! Null pad 16 bits, name field
+     next Data_Block1
+   end repeat
+   execute  Chip_select_low             ! GJO 951220 - Fails w/o this
+end unit
+
+unit  "Verify_addr_24"
+   execute  Chip_select_high
+   call  Read_Ram                       ! MSB & Op code for write
+   call  Address_01                    ! Set 1st 2 address bits to 1
+   call  Address_7                     ! Set 2nd 4 address bits to 7
+   execute  DO_0                        ! Reads dummy bit (zero)
+   repeat   16 times
+      execute  DO receive data Data_Block1  ! Null pad 16 bits, name field
+    next Data_Block1
+   end repeat
+   execute  Chip_select_low             ! GJO 951220 - Fails w/o this
+end unit
+
+unit  "Verify_addr_25"        ! Using data block
+   execute  Chip_select_high
+   call  Read_Ram                       ! MSB & Op code for write
+   call  Address_01                    ! Set 1st 2 address bits to 1
+   call  Address_8                     ! Set 2nd 4 address bits to 8
+   execute  DO_0                        ! Reads dummy bit (zero)
+   repeat   16 times
+      execute  DO receive data Data_Block1  ! Null pad 16 bits, name field
+     next Data_Block1
+   end repeat
+   execute  Chip_select_low             ! GJO 951220 - Fails w/o this
+end unit
+
+unit  "Verify_addr_26"
+   execute  Chip_select_high
+   call  Read_Ram                       ! MSB & Op code for write
+   call  Address_01                    ! Set 1st 2 address bits to 1
+   call  Address_9                     ! Set 2nd 4 address bits to 9
+   execute  DO_0                        ! Reads dummy bit (zero)
+   repeat   16 times
+      execute  DO receive data Data_Block1  ! Null pad 16 bits, name field
+    next Data_Block1
+   end repeat
+   execute  Chip_select_low             ! GJO 951220 - Fails w/o this
+end unit
+
+unit  "Verify_addr_27"        ! Using data block
+   execute  Chip_select_high
+   call  Read_Ram                       ! MSB & Op code for write
+   call  Address_01                    ! Set 1st 2 address bits to 1
+   call  Address_A                     ! Set 2nd 4 address bits to A
+   execute  DO_0                        ! Reads dummy bit (zero)
+   repeat   16 times
+      execute  DO receive data Data_Block1  ! Null pad 16 bits, name field
+     next Data_Block1
+   end repeat
+   execute  Chip_select_low             ! GJO 951220 - Fails w/o this
+end unit
+
+unit  "Verify_addr_28"
+   execute  Chip_select_high
+   call  Read_Ram                       ! MSB & Op code for write
+   call  Address_01                    ! Set 1st 2 address bits to 1
+   call  Address_B                     ! Set 2nd 4 address bits to B
+   execute  DO_0                        ! Reads dummy bit (zero)
+   repeat   16 times
+      execute  DO receive data Data_Block1  ! Null pad 16 bits, name field
+    next Data_Block1
+   end repeat
+   execute  Chip_select_low             ! GJO 951220 - Fails w/o this
+end unit
+
+unit  "Verify_addr_29"        ! Using data block
+   execute  Chip_select_high
+   call  Read_Ram                       ! MSB & Op code for write
+   call  Address_01                    ! Set 1st 2 address bits to 1
+   call  Address_C                     ! Set 2nd 4 address bits to C
+   execute  DO_0                        ! Reads dummy bit (zero)
+   repeat   16 times
+      execute  DO receive data Data_Block1  ! Binary option flags
+     next Data_Block1
+   end repeat
+   execute  Chip_select_low             ! GJO 951220 - Fails w/o this
+end unit
+
+unit  "Verify_addr_30"
+   execute  Chip_select_high
+   call  Read_Ram                       ! MSB & Op code for write
+   call  Address_01                    ! Set 1st 2 address bits to 1
+   call  Address_D                     ! Set 2nd 4 address bits to D
+   execute  DO_0                        ! Reads dummy bit (zero)
+   repeat   16 times
+      execute  DO receive data Data_Block1  ! binary reserved
+    next Data_Block1
+   end repeat
+   execute  Chip_select_low             ! GJO 951220 - Fails w/o this
+end unit
+
+unit  "Verify_addr_31"        ! Using data block
+   execute  Chip_select_high
+   call  Read_Ram                       ! MSB & Op code for write
+   call  Address_01                    ! Set 1st 2 address bits to 1
+   call  Address_E                     ! Set 2nd 4 address bits to E
+   execute  DO_0                        ! Reads dummy bit (zero)
+   repeat   16 times
+      execute  DO receive data Data_Block1  ! checksum
+     next Data_Block1
+   end repeat
+   execute  Chip_select_low             ! GJO 951220 - Fails w/o this
+end unit
+
+unit  "Verify_addr_32"        ! Using data block
+   execute  Chip_select_high
+   call  Read_Ram                       ! MSB & Op code for write
+   call  Address_01                     ! Set 1st 2 address bits to 1
+   call  Address_F                     ! Set 2nd 4 address bits to E
+   execute  DO_0                      ! Reads dummy bit (zero)
+   repeat   16 times
+      execute  DO receive data Data_Block1  ! checksum
+     next Data_Block1
+   end repeat
+   execute  Chip_select_low             ! GJO 951220 - Fails w/o this
+end unit
+
+unit  "Verify_addr_33"        ! Check for '0''s
+   execute  Chip_select_high
+   call  Read_Ram                       ! MSB & Op code for write
+   call  Address_10                     ! Set 1st 2 address bits to 10
+   call  Address_0                     ! Set 2nd 4 address bits to E
+   execute  DO_0                      ! Reads dummy bit (zero)
+   repeat   16 times
+      execute  DO_0
+   end repeat
+   execute  Chip_select_low             ! GJO 951220 - Fails w/o this
+end unit
+@
+
+
+1.1.1.1
+log
+@initial import by leey
+@
+text
+@@

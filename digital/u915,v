@@ -1,0 +1,564 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  V_2-TE-KE00-183-1_0_0_0:1.1.1.1 Keysight:1.1.1;
+locks    ; strict;
+comment  @# @;
+
+
+1.1
+date     2016.01.28.05.34.45;  author user2;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2016.01.28.05.34.45;  author user2;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@!!!!    6    1    1 1042131652   0000                                         
+!IPG: rev B.02.78 Thu Jul 02 08:57:08 1998
+
+!    1820-6752
+!    custom I/O totem 4-bit_parallel-in/out_serial-in
+!    revision A.01.00
+!    BAP  3/20/90
+sequential
+
+default device "u915"
+assign  VCC         to pins *,* ,* ,* 
+assign  GND         to pins *, * , * , * 
+
+assign  Parallel_inputs to pins 19,20,28,6
+assign  A_input         to pins 19
+assign  B_input         to pins 20
+assign  C_input         to pins 28
+assign  D_input         to pins 6
+
+assign  Q0_output   to pins 32
+assign  Q1_output   to pins 33
+assign  Q2_output   to pins 34
+assign  Q3_output   to pins * 
+assign  Q4_output   to pins 36
+assign  Q5_output   to pins * 
+assign  Q6_output   to pins * 
+assign  Q7_output   to pins * 
+assign  Q8_output   to pins 42
+assign  Q9_output   to pins 43
+assign  Q10_output  to pins 44
+assign  Q11_output  to pins 1
+assign  Q12_output  to pins 2
+assign  Q13_output  to pins 3
+assign  Q14_output  to pins 4
+assign  Q15_output  to pins 5
+assign  Q16_output  to pins *
+assign  Q17_output  to pins * 
+assign  Q18_output  to pins * 
+assign  Q19_output  to pins * 
+assign  Q20_output  to pins * 
+assign  Q21_output  to pins * 
+assign  Outputs     to pins 32,33, 34, * , 36, * , * , * , 42, 43, 44
+assign  Outputs     to pins 1,2,3, 4, 5, *, * ,* ,* ,* ,* 
+
+assign  Clock       to pins 18
+
+assign  Ser_clock   to pins 22
+assign  Ser_data    to pins 23
+assign  Ser_Strobe  to pins * 
+assign  Expan_clock to pins 26
+assign  Shift_load  to pins * 
+assign  Par_Strobe  to pins * 
+
+assign  EEprom      to pins 27
+assign  Data        to pins 31
+assign  Enable      to pins 15
+assign  Tristate    to pins 15, 18
+
+family  TTL
+
+power   VCC, GND
+
+inputs  Parallel_inputs, A_input, B_input, C_input, D_input, Clock, Tristate
+
+outputs Q0_output, Q1_output, Q2_output, Q3_output, Q4_output, Q5_output
+outputs Q6_output, Q7_output, Q8_output, Q9_output, Q10_output, Q11_output
+outputs Q12_output, Q13_output, Q14_output, Q15_output, Q16_output, Q17_output
+outputs Q18_output, Q19_output, Q20_output, Q21_output, Outputs
+outputs Ser_clock, Ser_data, Ser_strobe, Expan_clock, Shift_load, Par_Strobe
+
+bidirectional Enable, Data, EEprom
+
+disable Data, EEprom, Outputs, Par_Strobe, Ser_clock with Tristate to  "1T" 4 times
+disable Ser_data, Ser_strobe, Expan_clock, Shift_load with Tristate to "1T" 4 times
+
+trace Outputs  to Parallel_inputs,Data,Clock,Enable,EEprom
+
+!IPG: Add defaults or loads to floating inputs and bidirs.
+assign Floating__Inputs to pins 18 default "0"
+inputs Floating__Inputs
+
+assign Disablegroup to nodes "U915-36" default "1"
+inputs Disablegroup
+
+assign DisableFamilyCMOS to nodes "U915-36"
+family CMOS on DisableFamilyCMOS
+inputs DisableFamilyCMOS
+
+!IPG: Safeguard will ignore disabled outputs
+disabled device "u918" pins 10
+
+
+!*******************************************************************************!*******************************************************************************
+!*******************************************************************************!*******************************************************************************
+
+  vector  Setup_highs_d
+    drive Enable
+    drive Data
+    drive Eeprom
+    set   Enable          to "1"
+    set   Data            to "1"
+    set   Eeprom          to "1"
+    set   Clock           to "1"
+    set   Parallel_inputs to "1111"
+  end vector
+
+  vector  Keeps_drivers
+    drive Enable
+    drive Data
+    drive Eeprom
+    set   Enable          to "k"
+    set   Data            to "k"
+    set   Eeprom          to "k"
+    set   Clock           to "k"
+    set   Parallel_inputs to "kkkk"
+  end vector
+
+  vector  Keeps_receivers
+    drive Enable
+    drive Eeprom
+    receive Data
+    set   Enable          to "k"
+    set   Data            to "X"
+    set   Eeprom          to "k"
+    set   Clock           to "k"
+    set   Parallel_inputs to "kkkk"
+  end vector
+
+  vector Clock_low
+     initialize to Keeps_drivers
+     set Clock            to  "0"
+  end vector
+
+  vector Clock_high
+     initialize to Keeps_drivers
+     set Clock            to  "1"
+  end vector
+
+  vector Clock_low_r
+     initialize to Keeps_receivers
+     set Clock            to  "0"
+  end vector
+
+  vector Clock_high_r
+     initialize to Keeps_receivers
+     set Clock            to  "1"
+  end vector
+
+  vector Data_low_d
+     initialize to Keeps_drivers
+     set Data             to  "0"
+  end vector
+
+  vector Data_high_d
+     initialize to Keeps_drivers
+     set Data             to  "1"
+  end vector
+
+  vector Data_low_r
+     initialize to Keeps_receivers
+     set Data             to  "0"
+  end vector
+
+  vector Data_high_r
+     initialize to Keeps_receivers
+     set Data             to  "1"
+  end vector
+
+  vector Outputs_low_high
+     initialize to Keeps_drivers
+     set Par_strobe       to  "1"
+     set Outputs          to  "01010101010 10101010101"
+  end vector
+
+  vector Outputs_high_low
+     initialize to Keeps_drivers
+     set Par_strobe       to  "1"
+     set Outputs          to  "10101010101 01010101010"
+  end vector
+
+  vector Enable_high
+     initialize to Keeps_drivers
+     set Enable           to  "1"
+  end vector
+
+  vector Enable_low
+     initialize to Keeps_drivers
+     set Enable           to  "0"
+  end vector
+
+  vector Serial_low
+     initialize to Keeps_drivers
+     set Ser_clock        to  "0"
+     set Ser_data         to  "0"
+     set Ser_strobe       to  "0"
+  end vector
+
+  vector Serial_high
+     initialize to Keeps_drivers
+     set Ser_clock        to  "0"
+     set Ser_data         to  "1"
+     set Ser_strobe       to  "0"
+  end vector
+
+  vector Tri_state_data
+     initialize to Keeps_drivers
+     set Data             to  "Z"
+  end vector
+
+  vector Parallel_inputs_high
+     initialize to Keeps_receivers
+     set Parallel_inputs  to  "1111"
+  end vector
+
+   vector Parallel_inputs_low
+     initialize to Keeps_receivers
+     set Parallel_inputs  to  "0000"
+  end vector
+
+  vector Parallel_inputs_low_high
+     initialize to Keeps_receivers
+     set Parallel_inputs  to  "0101"
+  end vector
+
+   vector Parallel_inputs_high_low
+     initialize to Keeps_receivers
+     set Parallel_inputs  to  "1010"
+  end vector
+
+  vector Parallel_read_low
+     initialize to Keeps_receivers
+     set Data             to  "0"
+     set Shift_load       to  "1"
+  end vector
+
+  vector Parallel_read_high
+     initialize to Keeps_receivers
+     set Data             to  "1"
+     set Shift_load       to  "1"
+     set Expan_clock      to  "0"
+  end vector
+
+  vector Expan_clock_high
+     initialize to Keeps_receivers
+     set Expan_clock      to  "1"
+  end vector
+
+  vector Expan_clock_low
+     initialize to Keeps_receivers
+     set Expan_clock      to  "0"
+  end vector
+
+ vector Setup_parallel_read
+     initialize to Keeps_drivers
+     set Enable           to  "1"
+     set Clock            to  "1"
+     set Data             to  "0"
+     set Parallel_inputs  to  "0101"
+     set Eeprom           to  "Z"
+  end vector
+
+  vector Exp_clock_low
+     initialize to Keeps_drivers
+     set Expan_clock      to  "0"
+  end vector
+
+  vector Shift_load_low
+     initialize to Keeps_receivers
+     set Shift_load       to  "0"
+  end vector
+
+  vector Eeprom_low_d
+     initialize to Keeps_receivers
+     set Eeprom           to  "0"
+     set Expan_clock      to  "0"
+  end vector
+
+  vector Eeprom_high_d
+     initialize to Keeps_receivers
+     set Eeprom           to  "1"
+     set Expan_clock      to  "0"
+  end vector
+
+  vector Eeprom_low_r
+     receive Eeprom
+     drive Enable
+     set Clock            to  "k"
+     set Enable           to  "k"
+     set Eeprom           to  "0"
+     set Expan_clock      to  "0"
+  end vector
+
+  vector Eeprom_high_r
+     receive Eeprom
+     drive Enable
+     set Clock            to  "k"
+     set Enable           to  "k"
+     set Eeprom           to  "1"
+     set Expan_clock      to  "0"
+  end vector
+
+
+!*******************************************************************************!*******************************************************************************
+
+  sub Clock_up
+     execute   Clock_low
+     execute   Clock_low
+     execute   Clock_high
+  subend
+
+  sub Clock_down
+     execute   Clock_high
+     execute   Clock_low
+  subend
+
+  sub Clock_down_r
+     execute   Clock_high_r
+     execute   Clock_low_r
+  subend
+
+ sub Clock_up_r
+     execute   Clock_low_r
+     execute   Clock_low_r
+     execute   Clock_high_r
+  subend
+
+
+!*******************************************************************************!*******************************************************************************
+
+
+sub DisableSub
+  execute DisableVector
+end sub
+
+unit "DisableUnit"
+  call DisableSub
+end unit
+
+  unit "Set_drivers_high"
+     execute   Setup_highs_d
+  end unit
+
+!IPG: Unit removed due to conflict in vector ENABLE_HIGH
+!IPG: Conflict with pins tied together on node U915-6
+  unit  "Set_up_status_register"
+     execute   Enable_high
+     execute   Enable_low
+     execute   Data_high_d
+     call Clock_up
+     execute   Data_low_d
+     call Clock_up
+   execute   Data_high_d
+     call Clock_up
+     execute   Tri_state_data
+     execute   Parallel_inputs_low
+     execute   Clock_low_r
+     call Clock_up_r
+     call Clock_up_r
+     call Clock_up_r
+  end unit
+
+!IPG: Unit removed due to conflict in vector ENABLE_HIGH
+!IPG: Conflict with pins tied together on node U915-6
+    unit  "Set_up_+_strobes"
+     execute   Enable_high
+     execute   Enable_low
+     execute   Data_high_d
+     call Clock_up
+     execute   Data_high_d
+     call Clock_up
+     execute   Data_low_d
+     call Clock_up
+     execute   Tri_state_data
+     execute   Parallel_inputs_high
+     execute   Clock_low_r
+     call Clock_up_r
+     call Clock_up_r
+     call Clock_up_r
+  end unit
+
+!IPG: Unit removed due to conflict in vector ENABLE_HIGH
+!IPG: Conflict with pins tied together on node U915-6
+! unit  "Parallel_write_low_high"
+!    execute   Enable_high
+!    execute   Enable_low
+!    execute   Data_low_d
+!    repeat 3 times
+!      call Clock_up
+!    end repeat
+! repeat 11 times
+!      execute   Data_high_d
+!        call Clock_down
+!      execute   Data_low_d
+!        call Clock_down
+!    end repeat
+!    execute   Enable_high
+!    execute   Outputs_low_high
+! end unit
+
+!IPG: Unit removed due to conflict in vector ENABLE_HIGH
+!IPG: Conflict with pins tied together on node U915-6
+  unit  "Parallel_write_high_low"
+     execute   Enable_high
+     execute   Enable_low
+     execute   Data_low_d
+     repeat 3 times
+       call Clock_up
+     end repeat
+     repeat 11 times
+         execute   Data_low_d
+            call Clock_down
+         execute   Data_high_d
+            call Clock_down
+     end repeat
+     execute   Enable_high
+     execute   Outputs_high_low
+  end unit
+
+!IPG: Unit removed due to conflict in vector ENABLE_HIGH
+!IPG: Conflict with pins tied together on node U915-6
+  unit  "Serial_write_low"
+     execute   Enable_high
+     execute   Enable_low
+     execute   Data_low_d
+       repeat 2 times
+         call Clock_up
+       end repeat
+     execute Data_high_d
+     call Clock_up
+     execute Data_low_d
+     call Clock_down
+     execute Enable_high
+     execute Serial_low
+  end unit
+
+!IPG: Unit removed due to conflict in vector ENABLE_HIGH
+!IPG: Conflict with pins tied together on node U915-6
+  unit  "Serial_write_high"
+     execute   Enable_high
+     execute   Enable_low
+     execute   Data_low_d
+       repeat 2 times
+         call Clock_up
+       end repeat
+     execute   Data_high_d
+     call Clock_up
+     execute   Data_high_d
+     call Clock_down
+     execute   Enable_high
+     execute   Serial_high
+  end unit
+
+!IPG: Unit removed due to conflict in vector ENABLE_HIGH
+!IPG: Conflict with pins tied together on node U915-6
+  unit  "Eeprom_write_low_high"
+     execute   Enable_high
+     execute   Enable_low
+     execute   Data_low_d
+     call Clock_up
+     execute   Data_high_d
+     call Clock_up
+     call Clock_up
+     execute   Data_low_d
+     call Clock_down
+     execute   Eeprom_low_r
+     execute   Data_high_d
+     call Clock_down
+     execute   Eeprom_high_r
+     execute   Expan_clock_low
+     call Clock_up
+     execute   Expan_clock_high
+     execute Enable_high
+  end unit
+
+!IPG: Unit removed due to conflict in vector ENABLE_HIGH
+!IPG: Conflict with pins tied together on node U915-6
+   unit  "Eeprom_read_low_high"
+     execute   Enable_high
+     execute   Enable_low
+     execute   Data_high_d
+     call Clock_up
+     execute   Data_low_d
+     call Clock_up
+     call Clock_up
+     execute   Tri_state_data
+     execute   Eeprom_low_d
+     call Clock_down_r
+     execute   Data_low_r
+     execute   Eeprom_high_d
+     call Clock_down_r
+     execute   Data_high_r
+     execute   Expan_clock_low
+     call Clock_up
+     execute   Expan_clock_high
+     execute   Enable_high
+  end unit
+
+!IPG: Unit removed due to conflict in vector SETUP_PARALLEL_READ
+!IPG: Conflict with pins tied together on node U915-6
+!   unit  "Parallel_read_low_high"
+!     execute   Setup_parallel_read
+!     execute   Enable_low
+!     execute   Data_low_d
+!     call Clock_up
+!     execute   Data_high_d
+!     call Clock_up
+!     execute   Data_low_d
+!     call Clock_up
+!     execute   Tri_state_data
+!     execute   Parallel_inputs_low_high
+!     execute   Clock_low_r
+!     execute   Parallel_read_low
+!     execute   Clock_high_r
+!     execute   Parallel_read_high
+!     call Clock_up_r
+!     execute   Parallel_read_low
+!     call Clock_up_r
+!     execute   Parallel_read_high
+!     execute   Clock_low_r
+!     execute   Expan_clock_low
+!     execute   Enable_high
+!     execute   Shift_load_low
+!  end unit
+
+ ! End of test
+
+@
+
+
+1.1.1.1
+log
+@initial import by leey
+@
+text
+@@
