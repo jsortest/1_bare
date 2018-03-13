@@ -1,0 +1,666 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  V_2-TE-KE00-183-1_0_0_0:1.1.1.1 Keysight:1.1.1;
+locks    ; strict;
+comment  @# @;
+
+
+1.1
+date     2016.01.28.05.34.45;  author user2;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2016.01.28.05.34.45;  author user2;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@!!!!    6    1    1 1042131652  V26a4                                         
+!IPG: rev B.02.78 Thu Jul 02 08:57:16 1998
+
+!    74161
+!    counter totem parallel_load_with_clear 4-bit
+!    revision A.01.00
+
+sequential
+
+default device "u932"
+assign   VCC       to pins   * 
+assign   GND       to pins   *
+
+assign   Preset_A  to pins   3
+assign   Preset_B  to pins   4
+assign   Preset_C  to pins   5
+assign   Preset_D  to pins   6
+assign   Presets   to pins   6,5,4,3
+
+assign   Outputs   to pins   * ,* ,* ,* 
+assign   Carry     to pins   15
+
+assign   Clear_bar to pins   *
+assign   Clock     to pins   2
+assign   Load_bar  to pins   9
+assign   Enables   to pins   *,* 
+
+family   CMOS
+
+power    VCC, GND
+
+inputs   Preset_A, Preset_B, Preset_C, Preset_D, Presets
+inputs   Clear_bar, Clock, Load_bar, Enables
+
+outputs  Outputs, Carry
+
+trace Outputs,Carry to Presets,Clear_bar,Clock,Load_bar,Enables
+
+!IPG: Add defaults or loads to floating inputs and bidirs.
+assign Floating__Inputs to pins 3,4,5,6 default "0000"
+inputs Floating__Inputs
+
+assign Disablegroup to nodes "U931-36" default "0"
+inputs Disablegroup
+
+assign DisableFamilyCMOS to nodes "U931-36"
+family CMOS on DisableFamilyCMOS
+inputs DisableFamilyCMOS
+
+!IPG: Safeguard will ignore disabled outputs
+disabled device "u931" pins 10,13,14,15,16,17,18,19,20,3,4,5,55,56,57
+disabled device "u931" pins 58,59,6,60,61,62,65,66,67,68,69,7,70,71
+disabled device "u931" pins 72,8,9
+
+
+!*********************************************************************
+!*********************************************************************
+
+vector  Initialize
+   set   Clock       to "1"
+   set   Clear_bar   to "1"
+   set   Enables     to "11"
+   set   Load_bar    to "1"
+end vector
+
+vector  Controls_keep
+   set   Clear_bar   to "k"
+   set   Clock       to "k"
+   set   Enables     to "kk"
+   set   Load_bar    to "k"
+end vector
+
+vector  Clear_lo
+   initialize        to Controls_keep
+   set   Clear_bar   to "0"
+end vector
+
+vector  Clear_hi
+   initialize        to Controls_keep
+   set   Clear_bar   to "1"
+end vector
+
+vector  Clock_lo
+   initialize        to Controls_keep
+   set   Clock       to "0"
+end vector
+
+vector  Clock_hi
+   initialize        to Controls_keep
+   set   Clock       to "1"
+end vector
+
+vector  Clock_lo_A
+   initialize        to Controls_keep
+   set   Preset_A    to "k"
+   set   Clock       to "0"
+end vector
+
+vector  Clock_hi_A
+   initialize        to Controls_keep
+   set   Preset_A    to "k"
+   set   Clock       to "1"
+end vector
+
+vector  Clock_lo_B
+   initialize        to Controls_keep
+   set   Preset_B    to "k"
+   set   Clock       to "0"
+end vector
+
+vector  Clock_hi_B
+   initialize        to Controls_keep
+   set   Preset_B    to "k"
+   set   Clock       to "1"
+end vector
+
+vector  Clock_lo_C
+   initialize        to Controls_keep
+   set   Preset_C    to "k"
+   set   Clock       to "0"
+end vector
+
+vector  Clock_hi_C
+   initialize        to Controls_keep
+   set   Preset_C    to "k"
+   set   Clock       to "1"
+end vector
+
+vector  Clock_lo_D
+   initialize        to Controls_keep
+   set   Preset_D    to "k"
+   set   Clock       to "0"
+end vector
+
+vector  Clock_hi_D
+   initialize        to Controls_keep
+   set   Preset_D    to "k"
+   set   Clock       to "1"
+end vector
+
+vector  Preset_A_hi
+   initialize        to Controls_keep
+   set   Preset_A    to "1"
+   set   Load_bar    to "0"
+end vector
+
+vector  Preset_A_lo
+   initialize        to Controls_keep
+   set   Preset_A    to "0"
+   set   Load_bar    to "0"
+end vector
+
+vector  Preset_B_hi
+   initialize        to Controls_keep
+   set   Preset_B    to "1"
+   set   Load_bar    to "0"
+end vector
+
+vector  Preset_B_lo
+   initialize        to Controls_keep
+   set   Preset_B    to "0"
+   set   Load_bar    to "0"
+end vector
+
+vector  Preset_C_hi
+   initialize        to Controls_keep
+   set   Preset_C    to "1"
+   set   Load_bar    to "0"
+end vector
+
+vector  Preset_C_lo
+   initialize        to Controls_keep
+   set   Preset_C    to "0"
+   set   Load_bar    to "0"
+end vector
+
+vector  Preset_D_hi
+   initialize        to Controls_keep
+   set   Preset_D    to "1"
+   set   Load_bar    to "0"
+end vector
+
+vector  Preset_D_lo
+   initialize        to Controls_keep
+   set   Preset_D    to "0"
+   set   Load_bar    to "0"
+end vector
+
+vector  Output_XXX1
+   initialize        to Controls_keep
+   set   Outputs     to "XXX1"
+end vector
+
+vector  Output_XXX0
+   initialize        to Controls_keep
+   set   Outputs     to "XXX0"
+end vector
+
+vector  Output_XX1X
+   initialize        to Controls_keep
+   set   Outputs     to "XX1X"
+end vector
+
+vector  Output_XX0X
+   initialize        to Controls_keep
+   set   Outputs     to "XX0X"
+end vector
+
+vector  Output_X1XX
+   initialize        to Controls_keep
+   set   Outputs     to "X1XX"
+end vector
+
+vector  Output_X0XX
+   initialize        to Controls_keep
+   set   Outputs     to "X0XX"
+end vector
+
+vector  Output_1XXX
+   initialize        to Controls_keep
+   set   Outputs     to "1XXX"
+end vector
+
+vector  Output_0XXX
+   initialize        to Controls_keep
+   set   Outputs     to "0XXX"
+end vector
+
+vector  Output_0000
+   initialize        to Controls_keep
+   set   Carry       to "0"
+   set   Outputs     to "0000"
+end vector
+
+vector  Ripple_carry_hi
+   initialize        to Controls_keep
+   set   Carry       to "1"
+end vector
+
+vector  Ripple_carry_lo
+   initialize        to Controls_keep
+   set   Carry       to "0"
+end vector
+
+vector  Outputs_00000
+   initialize        to Controls_keep
+   set   Outputs     to "0000"
+   set   Carry       to "0"
+end vector
+
+vector  Outputs_11111
+   initialize        to Controls_keep
+   set   Outputs     to "1111"
+   set   Carry       to "1"
+end vector
+
+vector  Enable_01
+   initialize        to Controls_keep
+   set   Enables     to "01"
+end vector
+
+vector  Enable_10
+   initialize        to Controls_keep
+   set   Enables     to "10"
+end vector
+
+!*********************************************************************
+!*********************************************************************
+
+
+sub DisableSub
+  execute DisableVector
+end sub
+
+unit "DisableUnit"
+  call DisableSub
+end unit
+
+unit  "test ripple carry output"
+   execute  Initialize
+   homingloop  4 times
+      execute  Clock_lo
+      execute  Clock_hi
+      execute  Ripple_carry_lo     exit if pass
+   end homingloop
+   homingloop  18 times
+      execute  Clock_lo
+      execute  Clock_hi
+      execute  Ripple_carry_hi     exit if pass
+   end homingloop
+   execute  Clock_lo
+   execute  Clock_hi
+   execute  Ripple_carry_lo
+end unit
+
+!IPG: Unit removed due to conflict in vector OUTPUT_0XXX
+!IPG: Pin 11 is not accessible.
+!unit  "test output D"
+!   execute  Initialize
+!   homingloop  11 times
+!      execute  Clock_lo
+!      execute  Clock_hi
+!      execute  Output_0XXX    exit if pass
+!   end homingloop
+!   homingloop  11 times
+!      execute  Clock_lo
+!      execute  Clock_hi
+!      execute  Output_1XXX    exit if pass
+!   end homingloop
+!end unit
+
+!IPG: Unit removed due to conflict in vector OUTPUT_X0XX
+!IPG: Pin 12 is not accessible.
+!unit  "test output C"
+!   execute  Initialize
+!   homingloop  7  times
+!      execute  Clock_lo
+!      execute  Clock_hi
+!      execute  Output_X0XX    exit if pass
+!   end homingloop
+!   homingloop  7  times
+!      execute  Clock_lo
+!      execute  Clock_hi
+!      execute  Output_X1XX    exit if pass
+!   end homingloop
+!end unit
+
+!IPG: Unit removed due to conflict in vector OUTPUT_XX0X
+!IPG: Pin 13 is not accessible.
+!unit  "test output B"
+!   execute  Initialize
+!   homingloop  5  times
+!      execute  Clock_lo
+!      execute  Clock_hi
+!      execute  Output_XX0X    exit if pass
+!   end homingloop
+!   homingloop  5  times
+!      execute  Clock_lo
+!      execute  Clock_hi
+!      execute  Output_XX1X    exit if pass
+!   end homingloop
+!end unit
+
+!IPG: Unit removed due to conflict in vector OUTPUT_XXX0
+!IPG: Pin 14 is not accessible.
+!unit  "test output A"
+!   execute  Initialize
+!   homingloop  4  times
+!      execute  Clock_lo
+!      execute  Clock_hi
+!      execute  Output_XXX0    exit if pass
+!   end homingloop
+!   homingloop  4  times
+!      execute  Clock_lo
+!      execute  Clock_hi
+!      execute  Output_XXX1    exit if pass
+!   end homingloop
+!end unit
+
+!IPG: Unit removed due to conflict in vector CLEAR_LO
+!IPG: Pin 1 tied high. 
+!unit  "test clear"
+!   execute  Initialize
+!   execute  Clear_lo
+!   execute  Clear_hi
+!   execute  Outputs_00000
+!   repeat   15 times
+!      execute  Clock_lo
+!      execute  Clock_hi
+!   end repeat
+!   execute  Outputs_11111
+!   execute  Clear_lo
+!   execute  Outputs_00000
+!end unit
+
+!IPG: Unit removed due to conflict in vector OUTPUT_1XXX
+!IPG: Pin 11 is not accessible.
+!unit  "test preset D lo"
+!   execute  Initialize
+!   homingloop  11 times
+!      execute  Clock_lo
+!      execute  Clock_hi
+!      execute  Output_1XXX   exit if pass
+!   end homingloop
+!   execute  Preset_D_lo
+!   execute  Clock_lo_D
+!   execute  Clock_hi_D
+!   execute  Output_0XXX
+!end unit
+
+!IPG: Unit removed due to conflict in vector OUTPUT_0XXX
+!IPG: Pin 11 is not accessible.
+!unit  "test preset D hi"
+!   execute  Initialize
+!   homingloop  11 times
+!      execute  Clock_lo
+!      execute  Clock_hi
+!      execute  Output_0XXX   exit if pass
+!   end homingloop
+!   execute  Preset_D_hi
+!   execute  Clock_lo_D
+!   execute  Clock_hi_D
+!   execute  Output_1XXX
+!end unit
+
+!IPG: Unit removed due to conflict in vector OUTPUT_X1XX
+!IPG: Pin 12 is not accessible.
+!unit  "test preset C lo"
+!   execute  Initialize
+!   homingloop  7  times
+!      execute  Clock_lo
+!      execute  Clock_hi
+!      execute  Output_X1XX   exit if pass
+!   end homingloop
+!   execute  Preset_C_lo
+!   execute  Clock_lo_C
+!   execute  Clock_hi_C
+!   execute  Output_X0XX
+!end unit
+
+!IPG: Unit removed due to conflict in vector OUTPUT_X0XX
+!IPG: Pin 12 is not accessible.
+!unit  "test preset C hi"
+!   execute  Initialize
+!   homingloop  7  times
+!      execute  Clock_lo
+!      execute  Clock_hi
+!      execute  Output_X0XX   exit if pass
+!   end homingloop
+!   execute  Preset_C_hi
+!   execute  Clock_lo_C
+!   execute  Clock_hi_C
+!   execute  Output_X1XX
+!end unit
+
+!IPG: Unit removed due to conflict in vector OUTPUT_XX1X
+!IPG: Pin 13 is not accessible.
+!unit  "test preset B lo"
+!   execute  Initialize
+!   homingloop  5  times
+!      execute  Clock_lo
+!      execute  Clock_hi
+!      execute  Output_XX1X   exit if pass
+!   end homingloop
+!   execute  Preset_B_lo
+!   execute  Clock_lo_B
+!   execute  Clock_hi_B
+!   execute  Output_XX0X
+!end unit
+
+!IPG: Unit removed due to conflict in vector OUTPUT_XX0X
+!IPG: Pin 13 is not accessible.
+!unit  "test preset B hi"
+!   execute  Initialize
+!   homingloop  5  times
+!      execute  Clock_lo
+!      execute  Clock_hi
+!      execute  Output_XX0X   exit if pass
+!   end homingloop
+!   execute  Preset_B_hi
+!   execute  Clock_lo_B
+!   execute  Clock_hi_B
+!   execute  Output_XX1X
+!end unit
+
+!IPG: Unit removed due to conflict in vector OUTPUT_XXX1
+!IPG: Pin 14 is not accessible.
+!unit  "test preset A lo"
+!   execute  Initialize
+!   homingloop  4  times
+!      execute  Clock_lo
+!      execute  Clock_hi
+!      execute  Output_XXX1   exit if pass
+!   end homingloop
+!   execute  Preset_A_lo
+!   execute  Clock_lo_A
+!   execute  Clock_hi_A
+!   execute  Output_XXX0
+!end unit
+
+!IPG: Unit removed due to conflict in vector OUTPUT_XXX1
+!IPG: Pin 14 is not accessible.
+!unit  "test preset A hi"
+!   execute  Initialize
+!   homingloop  4  times
+!      execute  Clock_lo
+!      execute  Clock_hi
+!      execute  Output_XXX1   exit if pass
+!   end homingloop
+!   execute  Preset_A_hi
+!   execute  Clock_lo_A
+!   execute  Clock_hi_A
+!   execute  Output_XXX1
+!end unit
+
+!IPG: Unit removed due to conflict in vector OUTPUT_1XXX
+!IPG: Pin 11 is not accessible.
+!unit  "test enable 1, output D available"
+!   execute  Initialize
+!   homingloop  11 times
+!      execute  Clock_lo
+!      execute  Clock_hi
+!      execute  Output_1XXX    exit if pass
+!   end homingloop
+!   execute  Enable_01
+!   repeat   8 times
+!      execute  Clock_lo
+!      execute  Clock_hi
+!   end repeat
+!   execute  Output_1XXX
+!end unit
+
+!IPG: Unit removed due to conflict in vector OUTPUT_X0XX
+!IPG: Pin 12 is not accessible.
+!unit  "test enable 1, output C available"
+!   execute  Initialize
+!   homingloop  7  times
+!      execute  Clock_lo
+!      execute  Clock_hi
+!      execute  Output_X0XX    exit if pass
+!   end homingloop
+!   execute  Enable_01
+!   repeat   4 times
+!      execute  Clock_lo
+!      execute  Clock_hi
+!   end repeat
+!   execute  Output_X0XX
+!end unit
+
+!IPG: Unit removed due to conflict in vector OUTPUT_XX0X
+!IPG: Pin 13 is not accessible.
+!unit  "test enable 1, output B available"
+!   execute  Initialize
+!   homingloop  5  times
+!      execute  Clock_lo
+!      execute  Clock_hi
+!      execute  Output_XX0X    exit if pass
+!   end homingloop
+!   execute  Enable_01
+!   repeat   2 times
+!      execute  Clock_lo
+!      execute  Clock_hi
+!   end repeat
+!   execute  Output_XX0X
+!end unit
+
+!IPG: Unit removed due to conflict in vector OUTPUT_XXX0
+!IPG: Pin 14 is not accessible.
+!unit  "test enable 1, output A available"
+!   execute  Initialize
+!   homingloop  4  times
+!      execute  Clock_lo
+!      execute  Clock_hi
+!      execute  Output_XXX0    exit if pass
+!   end homingloop
+!   execute  Enable_01
+!   execute  Clock_lo
+!   execute  Clock_hi
+!   execute  Output_XXX0
+!end unit
+
+!IPG: Unit removed due to conflict in vector OUTPUT_1XXX
+!IPG: Pin 11 is not accessible.
+!unit  "test enable 2, output D available"
+!   execute  Initialize
+!   homingloop  11 times
+!      execute  Clock_lo
+!      execute  Clock_hi
+!      execute  Output_1XXX    exit if pass
+!   end homingloop
+!   execute  Enable_10
+!   repeat   8 times
+!      execute  Clock_lo
+!      execute  Clock_hi
+!   end repeat
+!   execute  Output_1XXX
+!end unit
+
+!IPG: Unit removed due to conflict in vector OUTPUT_X0XX
+!IPG: Pin 12 is not accessible.
+!unit  "test enable 2, output C available"
+!   execute  Initialize
+!   homingloop  7  times
+!      execute  Clock_lo
+!      execute  Clock_hi
+!      execute  Output_X0XX    exit if pass
+!   end homingloop
+!   execute  Enable_10
+!   repeat   4 times
+!      execute  Clock_lo
+!      execute  Clock_hi
+!   end repeat
+!   execute  Output_X0XX
+!end unit
+
+!IPG: Unit removed due to conflict in vector OUTPUT_XX0X
+!IPG: Pin 13 is not accessible.
+!unit  "test enable 2, output B available"
+!   execute  Initialize
+!   homingloop  5  times
+!      execute  Clock_lo
+!      execute  Clock_hi
+!      execute  Output_XX0X    exit if pass
+!   end homingloop
+!   execute  Enable_10
+!   repeat   2 times
+!      execute  Clock_lo
+!      execute  Clock_hi
+!   end repeat
+!   execute  Output_XX0X
+!end unit
+
+!IPG: Unit removed due to conflict in vector OUTPUT_XXX0
+!IPG: Pin 14 is not accessible.
+!unit  "test enable 2, output A available"
+!   execute  Initialize
+!   homingloop  4  times
+!      execute  Clock_lo
+!      execute  Clock_hi
+!      execute  Output_XXX0    exit if pass
+!   end homingloop
+!   execute  Enable_10
+!   execute  Clock_lo
+!   execute  Clock_hi
+!   execute  Output_XXX0
+!end unit
+
+!    End of test
+@
+
+
+1.1.1.1
+log
+@initial import by leey
+@
+text
+@@

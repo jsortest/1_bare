@@ -1,0 +1,411 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  V_2-TE-KE00-183-1_0_0_0:1.1.1.1 Keysight:1.1.1;
+locks    ; strict;
+comment  @# @;
+
+
+1.1
+date     2016.01.28.05.34.45;  author user2;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2016.01.28.05.34.45;  author user2;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@!!!!    6    1    1 1042131653   0000                                         
+!IPG: rev B.02.78 Thu Jul 02 08:57:22 1998
+!     7474
+!     D flip flop
+!    revision A.01.00
+
+sequential
+
+vector cycle 500n
+receive delay 400n
+
+default device "u939"
+assign   VCC              to pins * 
+assign   GND              to pins *
+
+assign   E1_Clk           to pins *
+assign   E2_Clk           to pins 11 default "K"
+assign   E1_Clear         to pins *
+assign   E2_Clear         to pins * 
+assign   E1_Preset        to pins *
+assign   E2_Preset        to pins * 
+
+assign   E1_D             to pins *
+assign   E2_D             to pins 12 default "K"
+assign   E1_Q             to pins *
+assign   E2_Q             to pins 9 
+assign   E1_Q_bar         to pins *
+assign   E2_Q_bar         to pins *
+
+assign   Disable          to nodes "U935-3" default "K"
+
+family   CMOS
+power    VCC, GND
+
+inputs   E1_Preset, E1_Clear, E1_Clk, E1_D
+inputs   E2_Preset, E2_Clear, E2_Clk, E2_D, Disable
+outputs  E1_Q, E1_Q_bar
+outputs  E2_Q, E2_Q_bar
+
+outputs  limited to 2 at "0", 2 at "1"
+
+trace E1_Q, E1_Q_bar    to E1_Preset, E1_Clear, E1_Clk, E1_D
+trace E2_Q, E2_Q_bar    to E2_Preset, E2_Clear, E2_Clk, E2_D
+
+!*******************************************************************************
+!*******************************************************************************
+
+vector  E1_Init_Preset_and_Clear_false
+   set   E1_Preset   to "1"
+   set   E1_Clear    to "1"
+end vector
+
+vector  E1_Keep_Control
+   set   E1_Preset   to "k"
+   set   E1_Clear    to "k"
+   set   E1_Clk      to "k"
+end vector
+
+vector  E1_D_lo
+   initialize        to E1_Keep_Control
+   set   E1_Clk      to "k"
+   set   E1_D        to "0"
+end vector
+
+vector  E1_Clk_toggle
+   initialize        to E1_Keep_Control
+   set   E1_D        to "k"
+   set   E1_Clk      to "t"
+end vector
+
+vector  E1_Clk_toggle_D_tied_to_Q_bar
+   initialize        to E1_Keep_Control
+   set   E1_Clk      to "t"
+end vector
+
+vector  E1_Clk_lo
+   initialize        to E1_Keep_Control
+   set   E1_Clk      to "0"
+end vector
+
+vector  E1_Output_01
+   initialize        to E1_Keep_Control
+   set   E1_Q        to "0"
+   set   E1_Q_bar    to "1"
+end vector
+
+vector  E1_Output_10
+   initialize        to E1_Keep_Control
+   set   E1_Q        to "1"
+   set   E1_Q_bar    to "0"
+end vector
+
+vector  E1_Preset_true
+   set   E1_Clear    to "1"
+   set   E1_Preset   to "0"
+end vector
+
+vector  E1_D_hi
+   initialize        to E1_Keep_Control
+   set   E1_Clk      to "k"
+   set   E1_D        to "1"
+end vector
+
+vector  E1_Clear_true
+   set   E1_Preset   to "1"
+   set   E1_Clear    to "0"
+end vector
+
+vector  E2_Init_Preset_and_Clear_false
+   set   E2_Preset   to "1"
+   set   E2_Clear    to "1"
+end vector
+
+vector  E2_Keep_Control
+   set   E2_Preset   to "k"
+   set   E2_Clear    to "k"
+   set   E2_Clk      to "k"
+end vector
+
+vector  E2_D_lo
+   initialize        to E2_Keep_Control
+   set   E2_Clk      to "k"
+   set   E2_D        to "0"
+end vector
+
+vector  E2_Clk_toggle
+   initialize        to E2_Keep_Control
+   set   E2_D        to "k"
+   set   E2_Clk      to "t"
+end vector
+
+vector  E2_Clk_toggle_D_tied_to_Q_bar
+   initialize        to E2_Keep_Control
+   set   E2_Clk      to "t"
+end vector
+
+vector  E2_Clk_lo
+   initialize        to E2_Keep_Control
+   set   E2_Clk      to "0"
+end vector
+
+vector  E2_Output_01
+   initialize        to E2_Keep_Control
+   set   E2_Q        to "0"
+   set   E2_Q_bar    to "1"
+end vector
+
+vector  E2_Output_10
+   initialize        to E2_Keep_Control
+   set   E2_Q        to "1"
+   set   E2_Q_bar    to "0"
+end vector
+
+vector  E2_Preset_true
+   set   E2_Clear    to "1"
+   set   E2_Preset   to "0"
+end vector
+
+vector  E2_D_hi
+   initialize        to E2_Keep_Control
+   set   E2_Clk      to "k"
+   set   E2_D        to "1"
+end vector
+
+vector  E2_Clear_true
+   set   E2_Preset   to "1"
+   set   E2_Clear    to "0"
+end vector
+
+!*******************************************************************************
+!*******************************************************************************
+
+!IPG: Unit removed due to conflict in vector E1_CLK_TOGGLE
+!IPG: Pin 3 tied low. 
+!unit  "Test E1_Preset with Clear high"
+!   execute  E1_Init_Preset_and_Clear_false
+!   execute  E1_Clk_lo
+!   execute  E1_D_lo
+!   execute  E1_Clk_toggle
+!   execute  E1_Clk_toggle
+!   execute  E1_Output_01
+!   execute  E1_Preset_true
+!   execute  E1_Output_10
+!end unit
+
+!IPG: Unit removed due to conflict in vector E1_D_HI
+!IPG: Pin 2 tied low. 
+!unit  "Test E1_Clear with Preset high"
+!   execute  E1_Init_Preset_and_Clear_false
+!   execute  E1_Clk_lo
+!   execute  E1_D_hi
+!   execute  E1_Clk_toggle
+!   execute  E1_Clk_toggle
+!   execute  E1_Output_10
+!   execute  E1_Clear_true
+!   execute  E1_Output_01
+!end unit
+
+!IPG: Unit removed due to conflict in vector E1_D_HI
+!IPG: Pin 2 tied low. 
+!unit  "Drive E1_D with Clear and Preset high"
+!   execute  E1_Init_Preset_and_Clear_false
+!   execute  E1_Clk_lo
+!   execute  E1_D_hi
+!   execute  E1_Clk_toggle
+!   execute  E1_Clk_toggle
+!   execute  E1_Output_10
+!   execute  E1_D_lo
+!   execute  E1_Clk_toggle
+!   execute  E1_Clk_toggle
+!   execute  E1_Output_01
+!end unit
+
+!IPG: Unit removed because tied statement conflicts with topology
+!unit  "Drive E1_D with E1_Q_bar tied to E1_D"
+!   tied E1_D,E1_Q_bar
+!   execute  E1_Init_Preset_and_Clear_false
+!   execute  E1_Clk_lo
+!   homingloop  2 times
+!      execute  E1_Clk_toggle_D_tied_to_Q_bar
+!      execute  E1_Clk_toggle_D_tied_to_Q_bar
+!      execute  E1_Output_01   exit if pass
+!      !execute E1_Output_01   piped
+!      !execute E1_Output_01   piped
+!      !execute E1_Output_01   piped
+!      !execute E1_Output_01   piped
+!   end homingloop
+!   execute  E1_Clk_toggle_D_tied_to_Q_bar
+!   execute  E1_Clk_toggle_D_tied_to_Q_bar
+!   execute  E1_Output_10
+!   execute  E1_Clk_toggle_D_tied_to_Q_bar
+!   execute  E1_Clk_toggle_D_tied_to_Q_bar
+!   execute  E1_Output_01
+!end unit
+
+!IPG: Unit removed due to conflict in vector E1_D_HI
+!IPG: Pin 2 tied low. 
+!unit  "E1_D tied high, E1_Clear available"
+!   execute  E1_Init_Preset_and_Clear_false
+!   execute  E1_Clk_lo
+!   execute  E1_D_hi
+!   execute  E1_Clk_toggle
+!   execute  E1_Clk_toggle
+!   execute  E1_Output_10
+!   execute  E1_Clear_true
+!   execute  E1_Output_01
+!end unit
+
+!IPG: Unit removed due to conflict in vector E1_CLK_TOGGLE
+!IPG: Pin 3 tied low. 
+!unit  "E1_D tied low, preset available"
+!   execute  E1_Init_Preset_and_Clear_false
+!   execute  E1_Clk_lo
+!   execute  E1_D_lo
+!   execute  E1_Clk_toggle
+!   execute  E1_Clk_toggle
+!   execute  E1_Output_01
+!   execute  E1_Preset_true
+!   execute  E1_Output_10
+!end unit
+
+!IPG: Unit removed due to conflict in vector E1_CLEAR_TRUE
+!IPG: Pin 1 tied high. 
+!unit  "Test E1_Preset and Clear without Clk"
+!   execute  E1_Init_Preset_and_Clear_false
+!   execute  E1_Clear_true
+!   execute  E1_Output_01
+!   execute  E1_Preset_true
+!   execute  E1_Output_10
+!   execute  E1_Clear_true
+!   execute  E1_Output_01
+!end unit
+
+!IPG: Unit removed due to conflict in vector E2_PRESET_TRUE
+!IPG: Pin 10 tied high. 
+!unit  "Test E2_Preset with Clear high"
+!   execute  E2_Init_Preset_and_Clear_false
+!   execute  E2_Clk_lo
+!   execute  E2_D_lo
+!   execute  E2_Clk_toggle
+!   execute  E2_Clk_toggle
+!   execute  E2_Output_01
+!   execute  E2_Preset_true
+!   execute  E2_Output_10
+!end unit
+
+!IPG: Unit removed due to conflict in vector E2_CLEAR_TRUE
+!IPG: Pin 13 tied high. 
+!unit  "Test E2_Clear with Preset high"
+!   execute  E2_Init_Preset_and_Clear_false
+!   execute  E2_Clk_lo
+!   execute  E2_D_hi
+!   execute  E2_Clk_toggle
+!   execute  E2_Clk_toggle
+!   execute  E2_Output_10
+!   execute  E2_Clear_true
+!   execute  E2_Output_01
+!end unit
+
+unit  "Drive E2_D with Clear and Preset high"
+   execute  E2_Init_Preset_and_Clear_false
+   execute  E2_Clk_lo
+   execute  E2_D_hi
+   execute  E2_Clk_toggle
+   execute  E2_Clk_toggle
+   execute  E2_Output_10
+   execute  E2_D_lo
+   execute  E2_Clk_toggle
+   execute  E2_Clk_toggle
+   execute  E2_Output_01
+end unit
+
+!IPG: Unit removed because tied statement conflicts with topology
+!unit  "Drive E2_D with E2_Q_bar tied to E2_D"
+!   tied E2_D, E2_Q_bar
+!   execute  E2_Init_Preset_and_Clear_false
+!   execute  E2_Clk_lo
+!   homingloop  2 times
+!      execute  E2_Clk_toggle_D_tied_to_Q_bar
+!      execute  E2_Clk_toggle_D_tied_to_Q_bar
+!      execute  E2_Output_01   exit if pass
+!      !execute E2_Output_01   piped
+!      !execute E2_Output_01   piped
+!      !execute E2_Output_01   piped
+!      !execute E2_Output_01   piped
+!   end homingloop
+!   execute  E2_Clk_toggle_D_tied_to_Q_bar
+!   execute  E2_Clk_toggle_D_tied_to_Q_bar
+!   execute  E2_Output_10
+!   execute  E2_Clk_toggle_D_tied_to_Q_bar
+!   execute  E2_Clk_toggle_D_tied_to_Q_bar
+!   execute  E2_Output_01
+!end unit
+
+!IPG: Unit removed due to conflict in vector E2_CLEAR_TRUE
+!IPG: Pin 13 tied high. 
+!unit  "E2_D tied high, E2_Clear available"
+!   execute  E2_Init_Preset_and_Clear_false
+!   execute  E2_Clk_lo
+!   execute  E2_D_hi
+!   execute  E2_Clk_toggle
+!   execute  E2_Clk_toggle
+!   execute  E2_Output_10
+!   execute  E2_Clear_true
+!   execute  E2_Output_01
+!end unit
+
+!IPG: Unit removed due to conflict in vector E2_PRESET_TRUE
+!IPG: Pin 10 tied high. 
+!unit  "E2_D tied low, preset available"
+!   execute  E2_Init_Preset_and_Clear_false
+!   execute  E2_Clk_lo
+!   execute  E2_D_lo
+!   execute  E2_Clk_toggle
+!   execute  E2_Clk_toggle
+!   execute  E2_Output_01
+!   execute  E2_Preset_true
+!   execute  E2_Output_10
+!end unit
+
+!IPG: Unit removed due to conflict in vector E2_CLEAR_TRUE
+!IPG: Pin 13 tied high. 
+!unit  "Test E2_Preset and Clear without Clk"
+!   execute  E2_Init_Preset_and_Clear_false
+!   execute  E2_Clear_true
+!   execute  E2_Output_01
+!   execute  E2_Preset_true
+!   execute  E2_Output_10
+!   execute  E2_Clear_true
+!   execute  E2_Output_01
+!end unit
+
+! End of test
+@
+
+
+1.1.1.1
+log
+@initial import by leey
+@
+text
+@@
